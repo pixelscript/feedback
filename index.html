@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"> 
+	<title>
+		Feedback
+	</title>
+	<script src="https://code.jquery.com/jquery-2.1.3.js"></script>
+	<style>
+		* {
+		    font-family: 'Roboto Slab', serif;
+		    color: #111;
+		    font-weight:400;
+		    font-size:0.9em;
+		}
+		html,body{
+			width:100%;
+			height:100%;
+			margin:0;
+			padding:0;
+		}
+	</style>
+
+</head>
+<body>
+<script>
+	$(function(){
+		var $element = $('body'),
+		$document = $(document),
+		canvas, canvas2, ctx, ctx2,
+		mouseX = $element.width(),
+		mouseY = $element.height();
+
+		createCanvas();
+
+		$element.bind('touchmove',function(e) {
+			e.preventDefault();
+			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+
+			mouseX = touch.pageX;
+			mouseY = touch.pageY;
+		});
+		$document.bind('mousemove',function(e) {
+			mouseX = e.clientX;
+			mouseY = e.clientY*($element.height()/$(window).height());
+		});
+		$document.bind('touchstart',function(e){
+			resetCanvas();
+		});
+		$document.bind('click',function(e){
+			resetCanvas();
+		});
+
+
+		function resetCanvas(){
+			$element.find('canvas').remove();
+			createCanvas();
+		}
+
+		$(window).resize(function() {
+			resetCanvas();
+		});
+
+		function createCanvas() {
+			var cols = getRandCols();
+			canvas = $('<canvas></canvas>');
+			canvas2 = $('<canvas></canvas>');
+			canvas2.css({'position':'absolute','top':0,'left':0,'display':'none'});
+			canvas.css({'position':'absolute','top':0,'left':0});
+			ctx = canvas[0].getContext('2d');
+			ctx2 = canvas2[0].getContext('2d');
+			$element.append(canvas);
+			$element.append(canvas2);
+			canvas.attr('width',$element.width()+'px');
+			canvas.attr('height',$element.height()+'px');
+			canvas2.attr('width',$element.width()+'px');
+			canvas2.attr('height',$element.height()+'px');
+
+			ctx.fillStyle = 'rgb('+cols[0].r+','+cols[0].g+','+cols[0].b+')';
+			ctx.fillRect (0, 0, $element.width(), $element.height());
+
+			ctx2.fillStyle = 'rgb('+cols[1].r+','+cols[1].g+','+cols[1].b+')';
+			ctx2.fillRect (0, 0, $element.width(), $element.height());
+
+		}
+
+		function copyAcross(e) {
+			var w = $element.width();
+			var h = $element.height();
+			var newX = Math.round((mouseX - (w / 2)) / 5);
+			var newY = Math.round((mouseY - (h / 2)) / 5);
+			ctx2.drawImage(canvas[0],0,0,w,h,newX,newY,w,h);
+			var newX2 = Math.round((mouseX - (w / 2)) / 5);
+			var newY2 = Math.round((mouseY - (h / 2)) / 5);
+			ctx.drawImage(canvas2[0],0,0,w,h,newX2,newY2,w,h);
+			if(window.requestAnimationFrame) {
+				requestAnimationFrame(copyAcross);
+			}
+		}
+
+		if(window.requestAnimationFrame) {
+			requestAnimationFrame(copyAcross);
+		} else {
+			setInterval(copyAcross,3);
+		}
+
+		function randRange(min, max) {
+			return Math.floor(Math.random() * ((max - min) + 1)) + min;
+		}
+
+		function getRandCols() {
+			var r = randRange(0, 200),
+			g = randRange(0,200),
+			b = randRange(0, 200),
+			r2 = r+55,
+			g2 = g+55,
+			b2 = b+55;
+			
+			return [{r:r,g:g,b:b},{r:r2,g:g2,b:b2}];
+		}
+	});
+</script>
+</body>
+</html>
