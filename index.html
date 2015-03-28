@@ -27,29 +27,61 @@
 	$(function(){
 		var $element = $('body'),
 		$document = $(document),
-		canvas, canvas2, ctx, ctx2,
-		mouseX = $element.width(),
-		mouseY = $element.height();
+		w = $element.width(),
+		h = $element.height(),
+		canvas, canvas2, ctx, ctx2,startX,startY
+		mouseX = startX = lastX = w*0.55,
+		mouseY = startY = lastY = h*0.55;
 
 		createCanvas();
 
-		$element.bind('touchmove',function(e) {
-			e.preventDefault();
-			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+		if(!isTouch()){
+			$document.bind('mousemove',function(e) {
+				mouseX = e.clientX;
+				mouseY = e.clientY;
+			});
+			$document.bind('mouseup',function(e){
+				resetCanvas();
+			});
+		} else {
+			$document.bind('mousemove',function(e) {
+				mouseX = e.clientX;
+				mouseY = e.clientY;
+			});
+			$document.bind('mouseup',function(e){
+				resetCanvas();
+			});
+			$document.bind('touchmove',function(e) {
+				e.preventDefault();
+				var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+				mouseX = lastX+(touch.pageX-startX);
+				mouseY = lastY+(touch.pageY-startY);
+				
+			});
 
-			mouseX = touch.pageX;
-			mouseY = touch.pageY;
-		});
-		$document.bind('mousemove',function(e) {
-			mouseX = e.clientX;
-			mouseY = e.clientY*($element.height()/$(window).height());
-		});
-		$document.bind('touchstart',function(e){
-			resetCanvas();
-		});
-		$document.bind('click',function(e){
-			resetCanvas();
-		});
+			$document.bind('touchend',function(e) {
+				lastX = mouseX;
+				lastY = mouseY;
+			});
+
+			
+			var time = Date.now();
+			$document.bind('touchstart',function(e){
+				e.preventDefault();
+				var now = now = Date.now();
+				if(now - time <300) {
+					resetCanvas();
+				}
+				console.log(now-time);
+				var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+				startX = touch.pageX;
+				startY = touch.pageY;
+				time = now;
+			});
+		}
+
+
+		
 
 
 		function resetCanvas(){
@@ -117,6 +149,14 @@
 			b2 = b+55;
 			
 			return [{r:r,g:g,b:b},{r:r2,g:g2,b:b2}];
+		}
+
+		function isTouch(){
+			var bool = false;
+			if(('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+				bool = true;
+			}
+			return bool;
 		}
 	});
 </script>
